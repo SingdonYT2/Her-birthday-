@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Favorite Person ❤️</title>
+    <style>
+        :root { 
+            --light-pink: #fbcfe8; 
+            --hot-pink: #ff2d75; 
+            --gold: #f59e0b;
+            --black: #0d0d0d; 
+            --white: #ffffff; 
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background-color: var(--light-pink); 
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--black);
+            position: relative;
+        }
+
+        /* 🌸 PETAL FALL BACKGROUND */
+        #petal-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -5;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .petal {
+            position: absolute;
+            background: rgba(255, 45, 117, 0.4);
+            border-radius: 50% 0 50% 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(255, 45, 117, 0.2);
+        }
+
+        .container { width: 95%; max-width: 800px; text-align: center; position: relative; z-index: 10; }
+        .screen { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease; width: 100%; }
+        .active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* NOTIFICATION STACK */
+        #notification-stack {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+            pointer-events: none;
+            width: 90%;
+        }
+
+        .notif {
+            background: var(--black);
+            color: var(--white);
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 2px solid var(--hot-pink);
+            animation: slideUpFade 4s forwards;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-40px); }
+        }
+
+        /* GLOWING POLAROID */
+        .polaroid-frame {
+            background: white;
+            padding: 15px 15px 60px 15px;
+            box-shadow: 0 0 20px var(--hot-pink);
+            border-radius: 4px;
+            transform: rotate(-3deg);
+            position: relative;
+            margin-bottom: 30px;
+            animation: tiltShake 3s infinite ease-in-out;
+        }
+
+        @keyframes tiltShake {
+            0%, 100% { transform: rotate(-3deg) translateY(0); }
+            50% { transform: rotate(2deg) translateY(-10px); }
+        }
+
+        .polaroid-frame img { width: 220px; height: 260px; object-fit: cover; border: 1px solid #ddd; }
+
+        .polaroid-text {
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--black);
+            text-shadow: 0 0 8px var(--hot-pink);
+            animation: glowText 1.5s infinite alternate;
+        }
+
+        @keyframes glowText {
+            from { text-shadow: 0 0 5px var(--hot-pink); }
+            to { text-shadow: 0 0 20px var(--hot-pink), 0 0 30px var(--hot-pink); color: white; }
+        }
+
+        /* CONTENT CONTAINER */
+        #typewriter-container { 
+            position: relative; 
+            background: rgba(13, 13, 13, 0.95);
+            border: 4px solid var(--hot-pink); 
+            min-height: 280px; 
+            width: 100%;
+            box-sizing: border-box;
+            color: var(--white); 
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .swipe-card {
+            position: absolute;
+            width: 320px;
+            height: 220px;
+            background: var(--black);
+            color: white;
+            border: 3px solid var(--hot-pink);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            box-sizing: border-box;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* CENTERED LOVE QUESTION */
+        #love-question {
+            display: none;
+            position: relative; 
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* OVERLAYS */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.96);
+            color: white;
+            z-index: 5000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .fullscreen-overlay h1 { color: var(--hot-pink); font-size: 3rem; margin: 0; }
+        .fullscreen-overlay p { font-size: 1.2rem; line-height: 1.6; max-width: 600px; margin: 20px 0; }
+
+        /* BUTTONS */
+        .btn-wrapper { display: flex; gap: 20px; justify-content: center; margin-top: 30px; position: relative; width: 100%; min-height: 80px; }
+        
+        button {
+            background: var(--black);
+            color: white;
+            border: 2px solid var(--black);
+            width: 160px;
+            height: 60px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s;
+        }
+
+        .pulse-btn {
+            animation: pulse-pink 2s infinite;
+            border: 2px solid var(--white);
+        }
+
+        @keyframes pulse-pink {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 45, 117, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 45, 117, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 45, 117, 0); }
+        }
+
+        .no-btn { background: #555; border-color: #555; z-index: 1000; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        #really-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--black); color: white;
+            justify-content: center; align-items: center; flex-direction: column;
+            z-index: 500; border-radius: 16px;
+        }
+
+        /* GAME HUD & MOMO */
+        #game-stats { position: fixed; bottom: 20px; right: 20px; font-size: 2rem; font-weight: bold; }
+        .falling-momo { position: fixed; width: 100px; height: 100px; cursor: pointer; z-index: 1000; padding: 10px; touch-action: none; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+        
+        video { max-width: 100%; height: auto; border: 8px solid var(--black); border-radius: 20px; }
+    </style>
+</head>
+<body onload="startSakuraDream()">
+
+    <audio id="bg-music" src="hijo.mp3" loop preload="auto"></audio>
+    <audio id="snd-pop" src="pop.mp3" preload="auto"></audio>
+    <audio id="snd-swoosh" src="swoosh.mp3" preload="auto"></audio>
+    <audio id="snd-momo" src="momo.mp3" preload="auto"></audio>
+    <audio id="snd-gift" src="gift.mp3" preload="auto"></audio>
+
+    <div id="petal-container"></div>
+    <div id="notification-stack"></div>
+
+    <div id="game-hud" style="display:none;">
+        <div id="game-stats">🥟: <span id="score">0</span>/15</div>
+    </div>
+
+    <div id="heartbreak-overlay" class="fullscreen-overlay">
+        <h1 style="color:red;">💔 ERROR 404</h1>
+        <p>Even though we're in a relationship and I love you more than everything... it really hurts my heart.exe when you say NO to me 🥺</p>
+        <button style="width: auto; padding: 20px 40px; background: var(--hot-pink);" onclick="closeHeartbreak()">I'm sorry, I love you! ❤️</button>
+    </div>
+
+    <div id="game-start-overlay" class="fullscreen-overlay">
+        <h1>🥟 MOMO TIME!</h1>
+        <p>Eat all the momos you can by clicking on them! <br> Catch 15 to unlock your gift!</p>
+        <button style="width: auto; padding: 20px 40px; background: var(--gold); border-color: white;" onclick="beginFalling()">START EATING! 🥟</button>
+    </div>
+
+    <div class="container">
+        <div id="screen0" class="screen active">
+            <h1 style="font-size: 3rem; margin-bottom: 20px;">Ready for your gift? 🎁</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 40px;">Turn your sound up! 🔊</p>
+            <button class="pulse-btn" style="width: 250px; height: 80px; font-size: 2rem;" onclick="startExperience()">START</button>
+        </div>
+
+        <div id="screen1" class="screen">
+            <h1 style="font-size: 2.5rem;">IS TODAY A SPECIAL DAY? 🤔</h1>
+            <div class="btn-wrapper">
+                <button class="pulse-btn" onclick="nextScreen(2)">YES!</button>
+                </div>
+        </div>
+
+        <div id="screen2" class="screen">
+            <div class="polaroid-frame">
+                <img src="her.jpg" alt="Beautiful">
+                <div class="polaroid-text">My favourite kind of beautiful 😍</div>
+            </div>
+
+            <div id="typewriter-container">
+                <div id="card-stack">
+                    <div class="swipe-card" onclick="swipeCard(this)">Happy Birthday Bindia and I Love You<br>❤️❤️❤️</div>
+                    <div class="swipe-card" onclick="swipeCard(this)">Ng mek ko an le ng
+k Ing ta Ing dor de. 👀 Ng raje teng ne un eh.</div>
+                    <div class="swipe-card" onclick="swipeCard(this)">I'm jealous of
+everyone who gets to see you everyday. Ne ng
+chingtung ong ng phan, ng arje lang ingtung ong... 💓</div>
+                    <div class="swipe-card" onclick="swipeCard(this)">Ng Ning dolang ma
+ng nephan room arlo window long pen ng k
+lang last arni hut, laso moment cute pik an,
+I loved it. Laso hut ne ng phan ning ng dok pik an lo. 😚</div>
+                    <div id="last-card" class="swipe-card" onclick="swipeCard(this)">Ne ng phan ko an
+ma Ning ng k dok la k lamthe pen than un eh.. ❤️</div>
+                </div>
+
+                <div id="really-overlay">
+                    <h1 style="font-size: 3.5rem; margin:0;">REALLY!?</h1>
+                    <button style="background: var(--hot-pink); border-color: var(--white); width: 220px;" onclick="showGameInstructions()">Yess!</button>
+                </div>
+
+                <div id="love-question">
+                    <h2 style="font-size: 1.8rem;">Do you love me too? 🥺</h2>
+                    <div class="btn-wrapper">
+                        <button class="pulse-btn" onclick="triggerReally()">YES</button>
+                        <button id="no2" class="no-btn" onmousedown="handleNo('no2')">NO</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen4" class="screen">
+            <h1 style="font-size: 2rem;">TAP TO OPEN YOUR GIFT! 🎁</h1>
+            <div id="gift-box" style="font-size: 10rem; cursor: pointer; user-select:  none;" onclick="tapGift()">🎁</div>
+            <h2 id="tap-count">10 Taps remaining</h2>
+        </div>
+
+        <div id="screen5" class="screen">
+            <h1 style="font-size: 2.5rem;">Happy Birthday! ❤️</h1>
+            <video id="birthday-video" controls>
+                <source src="khat-cover.mp4" type="video/mp4">
+            </video>
+            <p style="margin-top:15px; font-size: 1.1rem; font-weight: bold;">Enjoy your cover of "Khat"! 🎸</p>
+        </div>
+    </div>
+
+    <script>
+        function startExperience() {
+            const music = document.getElementById('bg-music');
+            music.volume = 0.5;
+            music.play();
+            document.getElementById('petal-container').style.opacity = '1';
+            startSakuraDream();
+            nextScreen(1);
+        }
+
+        const playSnd = (id) => {
+            const s = document.getElementById(id);
+            if (s) { s.pause(); s.currentTime = 0; s.play().catch(e => {}); }
+        };
+
+        function startSakuraDream() {
+            const container = document.getElementById('petal-container');
+            for(let i=0; i<30; i++) setTimeout(spawnPetal, Math.random() * 5000);
+            setInterval(spawnPetal, 300);
+        }
+
+        function spawnPetal() {
+            const container = document.getElementById('petal-container');
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            const size = Math.random() * 15 + 10;
+            petal.style.width = size + 'px'; petal.style.height = size + 'px';
+            petal.style.left = Math.random() * 100 + 'vw'; petal.style.top = '-50px';
+            petal.style.background = Math.random() < 0.3 ? `rgba(245, 158, 11, 0.5)` : `rgba(255, 45, 117, 0.5)`;
+            container.appendChild(petal);
+            const duration = Math.random() * 8000 + 4000;
+            const fall = petal.animate([
+                { top: '-50px', transform: 'translateX(0) rotate(0deg)' },
+                { top: (window.innerHeight + 50) + 'px', transform: `translateX(${Math.random() * 200 - 100}px) rotate(${Math.random() * 1440 - 720}deg)` }
+            ], { duration: duration, easing: 'cubic-bezier(0.1, 0.5, 0.5, 1)' });
+            fall.onfinish = () => petal.remove();
+        }
+
+        let noClicks = 0;
+        const messages = ["Nice try! 😉", "Access Denied! 🚫", "Persistence! I like that.", "Are you serious? 😂", "SYSTEM SAYS NO.", "Processing... Still Love You.", "Don't do this...", "Okay, one more 'No' and I'm crashing.", "FINAL WARNING."];
+
+        function handleNo(id) {
+            playSnd('snd-pop');
+            noClicks++;
+            
+            // REDUCED TRIGGER: HEARTBREAK AT 10 CLICKS
+            if (noClicks === 10) { document.getElementById('heartbreak-overlay').style.display = 'flex'; return; }
+
+            const stack = document.getElementById('notification-stack');
+            const notif = document.createElement('div');
+            notif.className = 'notif';
+            notif.innerText = `[${noClicks}] ${noClicks <= messages.length ? messages[noClicks - 1] : "PLEASE CLICK YES! 😭"}`;
+            stack.appendChild(notif);
+            setTimeout(() => notif.remove(), 4000);
+
+            const btn = document.getElementById(id);
+            const padding = 120;
+            const safeWidth = window.innerWidth - (btn.offsetWidth + padding);
+            const safeHeight = window.innerHeight - (btn.offsetHeight + padding);
+            const randomX = Math.max(padding/2, Math.floor(Math.random() * safeWidth));
+            const randomY = Math.max(padding/2, Math.floor(Math.random() * safeHeight));
+            btn.style.position = 'fixed';
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+            btn.style.zIndex = "9999";
+        }
+
+        function closeHeartbreak() {
+            playSnd('snd-gift');
+            document.getElementById('heartbreak-overlay').style.display = 'none';
+            noClicks = 0;
+            const bts = document.querySelectorAll('.no-btn');
+            bts.forEach(b => { b.style.position = 'relative'; b.style.left = '0'; b.style.top = '0'; });
+        }
+
+        function nextScreen(n) {
+            if(n !== 1) playSnd('snd-pop');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen'+n).classList.add('active');
+        }
+
+        let cardsSwiped = 0;
+        function swipeCard(card) {
+            playSnd('snd-swoosh');
+            card.style.transform = "translateX(800px) rotate(45deg)";
+            card.style.opacity = "0";
+            cardsSwiped++;
+            setTimeout(() => {
+                card.style.display = "none";
+                if (cardsSwiped === 5) {
+                    document.getElementById('card-stack').style.display = 'none';
+                    document.getElementById('love-question').style.display = 'flex';
+                }
+            }, 500);
+        }
+
+        function triggerReally() { playSnd('snd-pop'); document.getElementById('really-overlay').style.display = 'flex'; }
+
+        function showGameInstructions() {
+            playSnd('snd-pop');
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('game-start-overlay').style.display = 'flex';
+        }
+
+        function beginFalling() {
+            playSnd('snd-pop');
+            document.getElementById('game-start-overlay').style.display = 'none';
+            document.getElementById('game-hud').style.display = 'block';
+            gameActive = true;
+            momoInterval = setInterval(() => { if(gameActive) spawnMomo(); }, 700);
+        }
+
+        let score = 0;
+        let gameActive = false;
+        let momoInterval;
+
+        function spawnMomo() {
+            const m = document.createElement('img');
+            m.className = 'falling-momo'; m.src = 'momo_real.png';
+            m.style.left = Math.random() * (window.innerWidth - 100) + 'px'; m.style.top = '-150px';
+            document.body.appendChild(m);
+            const fall = setInterval(() => {
+                let top = parseInt(m.style.top); m.style.top = (top + 6) + 'px';
+                if(top > window.innerHeight) { clearInterval(fall); m.remove(); }
+            }, 10);
+            m.addEventListener('pointerdown', () => {
+                playSnd('snd-momo');
+                score++; document.getElementById('score').innerText = score;
+                clearInterval(fall); m.remove();
+                if(score >= 15) { 
+                    gameActive = false; 
+                    clearInterval(momoInterval);
+                    document.getElementById('game-hud').style.display='none'; 
+                    nextScreen(4); 
+                }
+            });
+        }
+
+        let taps = 10;
+        function tapGift() {
+            playSnd('snd-pop');
+            taps--;
+            const box = document.getElementById('gift-box');
+            box.style.transform = `scale(1.1) rotate(${Math.random()*20-10}deg)`;
+            setTimeout(() => box.style.transform = 'scale(1)', 100);
+            document.getElementById('tap-count').innerText = taps + " Taps remaining";
+            if(taps <= 0) { 
+                playSnd('snd-gift'); 
+                const music = document.getElementById('bg-music');
+                let fade = setInterval(() => {
+                    if (music.volume > 0.05) music.volume -= 0.05;
+                    else { music.pause(); clearInterval(fade); }
+                }, 100);
+                nextScreen(5);
+            }
+        }
+</script>
+</body>
+</html>
